@@ -1,26 +1,44 @@
 const { nanoid } = require('nanoid')
-const bookShelf = require('./bookShelf')
+const books = require('./bookShelf')
 
 const addBookShelfHandler = (request, h) => {
-  const { title, tags, body } = request.payload
   const id = nanoid(16)
-  const createdAt = new Date().toISOString()
-  const updatedAt = createdAt
-
-  const newNote = {
-    title, tags, body, id, createdAt, updatedAt
+  
+  const { name, year, author, summary, publisher, pageCount, readPage, reading } = request.payload
+  
+  if(name === undefined || name === null){
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal menambahkan buku. Mohon isi nama buku'
+    })
+    response.code(400)
+    return response
   }
 
-  bookShelf.push(newNote)
+  let finished 
+  
+  if(pageCount === readPage){
+    finished = true
+  } else {
+    finished = false
+  }
+  const insertedAt = new Date().toISOString()
+  const updatedAt = insertedAt
 
-  const isSuccess = bookShelf.filter((note) => note.id === id).length > 0
+  const newbook = {
+    id, name, year, author, summary, publisher, pageCount, readPage,finished, reading, insertedAt, updatedAt
+  }
+
+  books.push(newbook)
+
+  const isSuccess = books.filter((book) => book.id === id).length > 0
 
   if (isSuccess) {
     const response = h.response({
       status: 'success',
-      message: 'Catatan berhasil ditambahkan',
+      message: 'Buku berhasil ditambahkan',
       data: {
-        noteId: id
+        bookId: id
       }
     })
     response.code(201)
@@ -36,18 +54,18 @@ const addBookShelfHandler = (request, h) => {
 
 const getAllBookShelfHandler = () => ({
   status: 'success',
-  data: { bookShelf }
+  data:  {books}
 })
 
 const getBookShelfByIdHandler = (request, h) => {
-  const { id } = request.params
+  const { bookId } = request.params
+  
+  const book = books.filter((book) => book.id === bookId)[0]
 
-  const note = bookShelf.filter((note) => note.id === id)[0]
-
-  if (note !== undefined) {
+  if (book !== undefined) {
     return {
       status: 'success',
-      data: { note }
+      data: { book }
     }
   }
 
@@ -60,20 +78,50 @@ const getBookShelfByIdHandler = (request, h) => {
 }
 
 const editBookShelfByIdHandler = (request, h) => {
-  const { id } = request.params
+  const { bookId } = request.params
 
-  const { title, tags, body } = request.payload
+  const { name, year, author, summary, publisher, pageCount, readPage, reading } = request.payload
+
+  if(name === undefined || name === null){
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal memperbarui buku. Mohon isi nama buku'
+    })
+    response.code(400)
+    return response
+  }
+
+  if(pageCount < readPage){
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount'
+    })
+    response.code(400)
+    return response
+  }
+  
+  if(pageCount === readPage){
+    finished = true
+  } else {
+    finished = false
+  }
 
   const updatedAt = new Date().toISOString()
 
-  const index = bookShelf.findIndex((note) => note.id === id)
+  const index = books.findIndex((book) => book.id === bookId)
 
   if (index !== -1) {
-    bookShelf[index] = {
-      ...bookShelf[index],
-      title,
-      tags,
-      body,
+    books[index] = {
+      ...books[index],
+      name,
+      year,
+      author,
+      summary,
+      publisher,
+      pageCount,
+      readPage,
+      finished,
+      reading,
       updatedAt
     }
     const response = h.response({
@@ -94,10 +142,10 @@ const editBookShelfByIdHandler = (request, h) => {
 const deleteBookShelfByIdHandler = (request, h) => {
   const { id } = request.params
 
-  const index = bookShelf.findIndex((note) => note.id === id)
+  const index = books.findIndex((book) => book.id === id)
 
   if (index !== -1) {
-    bookShelf.splice(index, 1)
+    books.splice(index, 1)
     const response = h.response({
       status: 'success',
       message: 'Catatan berhasil dihapus'
