@@ -55,7 +55,7 @@ const addBookShelfHandler = (request, h) => {
   }
   const response = h.response({
     status: 'fail',
-    message: 'Catatan gagal ditambahkan'
+    message: 'Buku gagal ditambahkan'
   })
   response.code(500)
   return response
@@ -154,14 +154,14 @@ const editBookShelfByIdHandler = (request, h) => {
     }
     const response = h.response({
       status: 'success',
-      message: 'Catatan berhasil diperbarui'
+      message: 'Buku berhasil diperbarui'
     })
     response.code(200)
     return response
   }
   const response = h.response({
     status: 'fail',
-    message: 'Gagal memperbarui catatan. Id tidak ditemukan'
+    message: 'Gagal memperbarui buku. Id tidak ditemukan'
   })
   response.code(404)
   return response
