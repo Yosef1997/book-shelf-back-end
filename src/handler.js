@@ -28,9 +28,17 @@ const addBookShelfHandler = (request, h) => {
 
   if (pageCount === readPage) {
     finished = true
+  } else if(readPage > pageCount) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount'
+    })
+    response.code(400)
+    return response 
   } else {
     finished = false
   }
+
   const insertedAt = new Date().toISOString()
   const updatedAt = insertedAt
 
